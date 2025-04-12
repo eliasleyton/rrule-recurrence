@@ -1,0 +1,106 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "DateReplacement": {
+            "properties": {
+                "date": {
+                    "format": "date-time",
+                    "type": "string"
+                },
+                "newDate": {
+                    "format": "date-time",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "date",
+                "newDate"
+            ],
+            "type": "object"
+        },
+        "TimeOffset": {
+            "properties": {
+                "hours": {
+                    "type": "number"
+                },
+                "minutes": {
+                    "type": "number"
+                },
+                "seconds": {
+                    "type": "number"
+                }
+            },
+            "type": "object"
+        },
+        "TimeOptions": {
+            "properties": {
+                "hour": {
+                    "type": "number"
+                },
+                "minute": {
+                    "type": "number"
+                },
+                "second": {
+                    "type": "number"
+                }
+            },
+            "type": "object"
+        }
+    },
+    "properties": {
+        "byweekday": {
+            "items": {
+                "type": "number"
+            },
+            "type": "array"
+        },
+        "dtstart": {
+            "format": "date-time",
+            "type": "string"
+        },
+        "excludeDates": {
+            "items": {
+                "format": "date-time",
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "freq": {
+            "type": "number"
+        },
+        "interval": {
+            "type": "number"
+        },
+        "keepLocalTime": {
+            "type": "boolean"
+        },
+        "replaceDates": {
+            "items": {
+                "$ref": "#/definitions/DateReplacement"
+            },
+            "type": "array"
+        },
+        "setTime": {
+            "$ref": "#/definitions/TimeOptions"
+        },
+        "targetTimezone": {
+            "type": "string"
+        },
+        "timeOffset": {
+            "$ref": "#/definitions/TimeOffset"
+        },
+        "tzid": {
+            "type": "string"
+        },
+        "until": {
+            "format": "date-time",
+            "type": "string"
+        }
+    },
+    "required": [
+        "dtstart",
+        "freq"
+    ],
+    "type": "object"
+}
+
