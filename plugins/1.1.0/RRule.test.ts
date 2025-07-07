@@ -283,4 +283,337 @@ describe(`RecurrenceRule (${version})`, () => {
 
     });
   });
+
+  describe('Exclude Days functionality (1.1.0)', () => {
+    test('should exclude specific days using excludeDays property', () => {
+      const recurrence = new CustomRecurrenceRule({
+        freq: RRule.DAILY,
+        interval: 1,
+        dtstart: datetime(2025, 4, 1, 10, 0, 0),
+        until: datetime(2025, 4, 10, 10, 0, 0),
+        tzid: "UTC",
+        excludeDays: [
+          new Date(2025, 3, 5), // April 5th (month is 0-based)
+          new Date(2025, 3, 7)  // April 7th
+        ]
+      });
+
+      const dates = recurrence.getAllDates();
+
+      // Should not include April 5th and 7th
+      const hasApril5 = dates.some(date => {
+        const dt = DateTime.fromJSDate(date);
+        return dt.year === 2025 && dt.month === 4 && dt.day === 5;
+      });
+
+      const hasApril7 = dates.some(date => {
+        const dt = DateTime.fromJSDate(date);
+        return dt.year === 2025 && dt.month === 4 && dt.day === 7;
+      });
+
+      expect(hasApril5).toBe(false);
+      expect(hasApril7).toBe(false);
+
+      // Should still include other days
+      const hasApril6 = dates.some(date => {
+        const dt = DateTime.fromJSDate(date);
+        return dt.year === 2025 && dt.month === 4 && dt.day === 6;
+      });
+
+      expect(hasApril6).toBe(true);
+    });
+
+    test('should handle timezone-aware day exclusion', () => {
+      const recurrence = new CustomRecurrenceRule({
+        freq: RRule.DAILY,
+        interval: 1,
+        dtstart: datetime(2025, 4, 1, 10, 0, 0),
+        until: datetime(2025, 4, 10, 10, 0, 0),
+        tzid: "America/Santiago",
+        targetTimezone: "America/Santiago",
+        excludeDays: [
+          new Date(2025, 3, 5) // April 5th
+        ]
+      });
+
+      const dates = recurrence.getAllDates();
+
+      // Should not include April 5th regardless of server timezone
+      const hasApril5 = dates.some(date => {
+        const dt = DateTime.fromJSDate(date);
+        return dt.year === 2025 && dt.month === 4 && dt.day === 5;
+      });
+
+      expect(hasApril5).toBe(false);
+    });
+
+    test('should allow adding exclude days after creation', () => {
+      const recurrence = new CustomRecurrenceRule({
+        freq: RRule.DAILY,
+        interval: 1,
+        dtstart: datetime(2025, 4, 1, 10, 0, 0),
+        until: datetime(2025, 4, 10, 10, 0, 0),
+        tzid: "UTC"
+      });
+
+      // Add exclude days after creation
+      recurrence.addExcludeDay(2025, 3, 5); // April 5th
+      recurrence.addExcludeDay(2025, 3, 7); // April 7th
+
+      const dates = recurrence.getAllDates();
+
+      // Should not include April 5th and 7th
+      const hasApril5 = dates.some(date => {
+        const dt = DateTime.fromJSDate(date);
+        return dt.year === 2025 && dt.month === 4 && dt.day === 5;
+      });
+
+      const hasApril7 = dates.some(date => {
+        const dt = DateTime.fromJSDate(date);
+        return dt.year === 2025 && dt.month === 4 && dt.day === 7;
+      });
+
+      expect(hasApril5).toBe(false);
+      expect(hasApril7).toBe(false);
+    });
+
+    test('should allow adding multiple exclude days at once', () => {
+      const recurrence = new CustomRecurrenceRule({
+        freq: RRule.DAILY,
+        interval: 1,
+        dtstart: datetime(2025, 4, 1, 10, 0, 0),
+        until: datetime(2025, 4, 10, 10, 0, 0),
+        tzid: "UTC"
+      });
+
+      // Add multiple exclude days
+      recurrence.addExcludeDays([
+        { year: 2025, month: 3, day: 5 }, // April 5th
+        { year: 2025, month: 3, day: 7 }, // April 7th
+        { year: 2025, month: 3, day: 9 }  // April 9th
+      ]);
+
+      const dates = recurrence.getAllDates();
+
+      // Should not include any of the excluded days
+      const hasApril5 = dates.some(date => {
+        const dt = DateTime.fromJSDate(date);
+        return dt.year === 2025 && dt.month === 4 && dt.day === 5;
+      });
+
+      const hasApril7 = dates.some(date => {
+        const dt = DateTime.fromJSDate(date);
+        return dt.year === 2025 && dt.month === 4 && dt.day === 7;
+      });
+
+      const hasApril9 = dates.some(date => {
+        const dt = DateTime.fromJSDate(date);
+        return dt.year === 2025 && dt.month === 4 && dt.day === 9;
+      });
+
+      expect(hasApril5).toBe(false);
+      expect(hasApril7).toBe(false);
+      expect(hasApril9).toBe(false);
+    });
+
+    test('should allow setting exclude days after creation', () => {
+      const recurrence = new CustomRecurrenceRule({
+        freq: RRule.DAILY,
+        interval: 1,
+        dtstart: datetime(2025, 4, 1, 10, 0, 0),
+        until: datetime(2025, 4, 10, 10, 0, 0),
+        tzid: "UTC"
+      });
+
+      // Set exclude days after creation
+      recurrence.setExcludeDays([
+        new Date(2025, 3, 5), // April 5th
+        new Date(2025, 3, 7)  // April 7th
+      ]);
+
+      const dates = recurrence.getAllDates();
+
+      // Should not include April 5th and 7th
+      const hasApril5 = dates.some(date => {
+        const dt = DateTime.fromJSDate(date);
+        return dt.year === 2025 && dt.month === 4 && dt.day === 5;
+      });
+
+      const hasApril7 = dates.some(date => {
+        const dt = DateTime.fromJSDate(date);
+        return dt.year === 2025 && dt.month === 4 && dt.day === 7;
+      });
+
+      expect(hasApril5).toBe(false);
+      expect(hasApril7).toBe(false);
+    });
+
+    test('should handle excludeDays with time adjustments', () => {
+      const recurrence = new CustomRecurrenceRule({
+        freq: RRule.DAILY,
+        interval: 1,
+        dtstart: datetime(2025, 4, 1, 10, 0, 0),
+        until: datetime(2025, 4, 10, 10, 0, 0),
+        tzid: "UTC",
+        excludeDays: [
+          new Date(2025, 3, 5) // April 5th
+        ],
+        setTime: { hour: 14, minute: 30, second: 0 }
+      });
+
+      const dates = recurrence.getAllDates();
+
+      // Should not include April 5th
+      const hasApril5 = dates.some(date => {
+        const dt = DateTime.fromJSDate(date);
+        return dt.year === 2025 && dt.month === 4 && dt.day === 5;
+      });
+
+      expect(hasApril5).toBe(false);
+
+      // Should still have time adjustments applied to other dates
+      if (dates.length > 0) {
+        const firstDate = DateTime.fromJSDate(dates[0]);
+        expect(firstDate.hour).toBe(14);
+        expect(firstDate.minute).toBe(30);
+      }
+    });
+
+    test('should handle excludeDays with time offsets', () => {
+      const recurrence = new CustomRecurrenceRule({
+        freq: RRule.DAILY,
+        interval: 1,
+        dtstart: datetime(2025, 4, 1, 10, 0, 0),
+        until: datetime(2025, 4, 10, 10, 0, 0),
+        tzid: "UTC",
+        excludeDays: [
+          new Date(2025, 3, 5) // April 5th
+        ],
+        timeOffset: { hours: 2, minutes: 30 }
+      });
+
+      const dates = recurrence.getAllDates();
+
+      // Should not include April 5th
+      const hasApril5 = dates.some(date => {
+        const dt = DateTime.fromJSDate(date);
+        return dt.year === 2025 && dt.month === 4 && dt.day === 5;
+      });
+
+      expect(hasApril5).toBe(false);
+
+      // Should still have time offsets applied to other dates
+      expect(dates.length).toBeGreaterThan(0);
+    });
+
+    test('should handle excludeDays with date replacements', () => {
+      const recurrence = new CustomRecurrenceRule({
+        freq: RRule.DAILY,
+        interval: 1,
+        dtstart: datetime(2025, 4, 1, 10, 0, 0),
+        until: datetime(2025, 4, 10, 10, 0, 0),
+        tzid: "UTC",
+        excludeDays: [
+          new Date(2025, 3, 5) // April 5th
+        ],
+        replaceDates: [
+          {
+            date: datetime(2025, 4, 3, 10, 0, 0),
+            newDate: datetime(2025, 4, 3, 14, 30, 0)
+          }
+        ]
+      });
+
+      const dates = recurrence.getAllDates();
+
+      // Should not include April 5th
+      const hasApril5 = dates.some(date => {
+        const dt = DateTime.fromJSDate(date);
+        return dt.year === 2025 && dt.month === 4 && dt.day === 5;
+      });
+
+      expect(hasApril5).toBe(false);
+
+      // Should still have date replacements applied to other dates
+      const april3 = dates.find(date => {
+        const dt = DateTime.fromJSDate(date);
+        return dt.year === 2025 && dt.month === 4 && dt.day === 3;
+      });
+
+      expect(april3).toBeDefined();
+    });
+
+    test('should handle empty excludeDays array', () => {
+      const recurrence = new CustomRecurrenceRule({
+        freq: RRule.DAILY,
+        interval: 1,
+        dtstart: datetime(2025, 4, 1, 10, 0, 0),
+        until: datetime(2025, 4, 10, 10, 0, 0),
+        tzid: "UTC",
+        excludeDays: []
+      });
+
+      const dates = recurrence.getAllDates();
+
+      // Should include all dates normally
+      expect(dates.length).toBeGreaterThan(0);
+
+      // Should include April 5th (not excluded)
+      const hasApril5 = dates.some(date => {
+        const dt = DateTime.fromJSDate(date);
+        return dt.year === 2025 && dt.month === 4 && dt.day === 5;
+      });
+
+      expect(hasApril5).toBe(true);
+    });
+
+    test('should include excludeDays in configuration output', () => {
+      const recurrence = new CustomRecurrenceRule({
+        freq: RRule.DAILY,
+        interval: 1,
+        dtstart: datetime(2025, 4, 1, 10, 0, 0),
+        until: datetime(2025, 4, 10, 10, 0, 0),
+        tzid: "UTC",
+        excludeDays: [
+          new Date(2025, 3, 5), // April 5th
+          new Date(2025, 3, 7)  // April 7th
+        ]
+      });
+
+      const config = recurrence.getConfig();
+
+      // Should include excludeDays in configuration
+      expect(config.excludeDays).toBeDefined();
+      expect(Array.isArray(config.excludeDays)).toBe(true);
+      expect(config.excludeDays.length).toBe(2);
+
+      // Should show both original and timezone-adjusted dates
+      expect(config.excludeDays[0]).toHaveProperty('original');
+      expect(config.excludeDays[0]).toHaveProperty('timezoneAdjusted');
+    });
+
+    test('should handle excludeDays with different timezones', () => {
+      const recurrence = new CustomRecurrenceRule({
+        freq: RRule.DAILY,
+        interval: 1,
+        dtstart: datetime(2025, 4, 1, 10, 0, 0),
+        until: datetime(2025, 4, 10, 10, 0, 0),
+        tzid: "America/New_York",
+        targetTimezone: "America/Los_Angeles",
+        excludeDays: [
+          new Date(2025, 3, 5) // April 5th
+        ]
+      });
+
+      const dates = recurrence.getAllDates();
+
+      // Should not include April 5th in the target timezone
+      const hasApril5 = dates.some(date => {
+        const dt = DateTime.fromJSDate(date);
+        return dt.year === 2025 && dt.month === 4 && dt.day === 5;
+      });
+
+      expect(hasApril5).toBe(false);
+    });
+  });
 }); 
