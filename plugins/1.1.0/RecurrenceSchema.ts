@@ -1,21 +1,21 @@
-export interface TimeOptions {
+export type TimeOptions = {
     hour?: number;
     minute?: number;
     second?: number;
 }
 
-export interface TimeOffset {
+export type TimeOffset = {
     hours?: number;
     minutes?: number;
     seconds?: number;
 }
 
-export interface DateReplacement {
+export type DateReplacement = {
     date: Date;
     newDate: Date;
 }
 
-export interface RecurrenceOptions {
+export type RecurrenceOptions = {
     freq: number;
     interval?: number;
     dtstart: Date;
@@ -23,6 +23,7 @@ export interface RecurrenceOptions {
     tzid?: string;
     byweekday?: number[];
     excludeDates?: Date[];
+    excludeDays?: Date[];
     keepLocalTime?: boolean;
     targetTimezone?: string;
     setTime?: TimeOptions;
@@ -47,6 +48,7 @@ export function migrateToCurrentSchema(options: any): RecurrenceOptions {
         tzid: options.tzid,
         byweekday: options.byweekday,
         excludeDates: options.excludeDates || [],
+        excludeDays: options.excludeDays || [],
         keepLocalTime: options.keepLocalTime !== undefined ? options.keepLocalTime : true,
         targetTimezone: options.targetTimezone || options.tzid || "UTC",
         setTime: options.setTime,
@@ -69,6 +71,7 @@ export function validateOptions(options: RecurrenceOptions): boolean {
     if (options.tzid !== undefined && typeof options.tzid !== 'string') return false;
     if (options.byweekday !== undefined && !Array.isArray(options.byweekday)) return false;
     if (options.excludeDates !== undefined && !Array.isArray(options.excludeDates)) return false;
+    if (options.excludeDays !== undefined && !Array.isArray(options.excludeDays)) return false;
     if (options.keepLocalTime !== undefined && typeof options.keepLocalTime !== 'boolean') return false;
     if (options.targetTimezone !== undefined && typeof options.targetTimezone !== 'string') return false;
     
