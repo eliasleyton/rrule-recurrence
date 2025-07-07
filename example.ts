@@ -12,7 +12,7 @@ const config = {
     ],
     keepLocalTime: true,
     targetTimezone: "America/Santiago",
-    timeOffset: { hours: 2 },
+    timeOffset: { hours: 0 },
     replaceDates: [
         {
             date: datetime(2025, 4, 13, 10, 0, 0),

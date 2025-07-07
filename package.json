@@ -15,8 +15,6 @@
   "author": "Elias Leyton",
   "license": "MIT",
   "dependencies": {
-    "ajv": "8.17.1",
-    "ajv-formats": "3.0.1",
     "luxon": "3.6.1",
     "rrule": "2.8.1"
   },

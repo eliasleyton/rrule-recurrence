@@ -139,7 +139,6 @@ npm run test:watch
 
 - rrule: For recurrence rule generation
 - luxon: For timezone handling
-- ajv: For schema validation
 - jest: For testing
 
 ## License
